@@ -31,7 +31,7 @@ export function loadSnapshot() {
 
     return snapshot
   } catch (error) {
-    console.warn('[directory-demo] 读取本地数据失败', error)
+    console.warn('[inspection-directory] 读取本地数据失败', error)
     return null
   }
 }
@@ -51,7 +51,7 @@ export function saveSnapshot({ rows, page, pageSize }) {
       }),
     )
   } catch (error) {
-    console.warn('[directory-demo] 保存本地数据失败', error)
+    console.warn('[inspection-directory] 保存本地数据失败', error)
   }
 }
 
@@ -61,6 +61,6 @@ export function clearSnapshot() {
     window.localStorage.removeItem(STORAGE_KEY)
     window.localStorage.removeItem(LEGACY_STORAGE_KEY)
   } catch (error) {
-    console.warn('[directory-demo] 清空本地数据失败', error)
+    console.warn('[inspection-directory] 清空本地数据失败', error)
   }
 }

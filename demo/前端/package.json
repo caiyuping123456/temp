@@ -1,9 +1,9 @@
 {
-  "name": "directory-tree-demo",
+  "name": "inspection-directory",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "检测目录树形表格示例",
+  "description": "检测目录树形表格",
   "scripts": {
     "dev": "vite",
     "build": "vite build",

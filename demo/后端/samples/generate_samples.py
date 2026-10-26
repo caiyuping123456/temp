@@ -1,10 +1,4 @@
-"""Generate the sample DOCX files used by the merge demo.
-
-Usage:
-    python samples/generate_samples.py
-
-Requires: python-docx, Pillow.
-"""
+"""生成测试用的 DOCX 文件。"""
 
 from __future__ import annotations
 
@@ -14,15 +8,11 @@ from docx import Document
 from docx.enum.table import WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml.ns import qn
-from docx.shared import Inches, Pt, RGBColor
-from PIL import Image, ImageDraw
+from docx.shared import Inches, Pt
+from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parent
 ASSETS = ROOT / "assets"
-
-BRAND = RGBColor(0x1F, 0x5B, 0x99)
-DEEP = RGBColor(0x17, 0x46, 0x6F)
-GREY = RGBColor(0x5B, 0x64, 0x74)
 
 
 def set_cell_shading(cell, color: str) -> None:
@@ -34,14 +24,12 @@ def set_cell_shading(cell, color: str) -> None:
     shd.set(qn("w:fill"), color)
 
 
-def set_cell_text(cell, text: str, *, bold: bool = False, color: RGBColor | None = None) -> None:
+def set_cell_text(cell, text: str, *, bold: bool = False) -> None:
     cell.text = ""
     paragraph = cell.paragraphs[0]
     run = paragraph.add_run(text)
     run.bold = bold
     run.font.size = Pt(9)
-    if color is not None:
-        run.font.color.rgb = color
 
 
 def add_table(document: Document, headers: list[str], rows: list[list[str]]) -> None:
@@ -49,8 +37,8 @@ def add_table(document: Document, headers: list[str], rows: list[list[str]]) -> 
     table.style = "Table Grid"
     table.alignment = WD_TABLE_ALIGNMENT.CENTER
     for index, header in enumerate(headers):
-        set_cell_text(table.rows[0].cells[index], header, bold=True, color=RGBColor(0xFF, 0xFF, 0xFF))
-        set_cell_shading(table.rows[0].cells[index], "2457D8")
+        set_cell_text(table.rows[0].cells[index], header, bold=True)
+        set_cell_shading(table.rows[0].cells[index], "D9E2F3")
     for row in rows:
         cells = table.add_row().cells
         for index, value in enumerate(row):
@@ -63,116 +51,150 @@ def add_bullets(document: Document, items: list[str]) -> None:
         document.add_paragraph(item, style="List Bullet")
 
 
-def add_numbers(document: Document, items: list[str]) -> None:
-    for item in items:
-        document.add_paragraph(item, style="List Number")
-
-
-def build_logo() -> Path:
+def build_diagram() -> Path:
     ASSETS.mkdir(parents=True, exist_ok=True)
-    path = ASSETS / "brand-logo.png"
-    image = Image.new("RGB", (480, 240), "white")
+    path = ASSETS / "equipment-diagram.png"
+    image = Image.new("RGB", (760, 360), "white")
     draw = ImageDraw.Draw(image)
-    draw.rounded_rectangle((24, 24, 456, 216), radius=8, fill="#1f5b99")
-    draw.ellipse((52, 62, 176, 186), fill="#ffffff")
-    draw.rectangle((150, 96, 420, 152), fill="#eaf1f8")
-    draw.rectangle((186, 112, 360, 136), fill="#1f5b99")
+    font = ImageFont.truetype(r"C:\Windows\Fonts\msyh.ttc", 18)
+    small = ImageFont.truetype(r"C:\Windows\Fonts\msyh.ttc", 14)
+
+    draw.rectangle((36, 44, 724, 304), outline="#9aa3ad", width=2)
+    draw.text((52, 54), "1 号车间东侧", fill="#333333", font=font)
+
+    boxes = {
+        "配电柜": (72, 104, 202, 168),
+        "控制柜": (238, 104, 368, 168),
+        "空调机组": (504, 92, 674, 156),
+        "循环风机": (504, 202, 674, 266),
+    }
+    for label, box in boxes.items():
+        draw.rectangle(box, fill="#f7f8f9", outline="#555f6a", width=2)
+        x1, y1, x2, y2 = box
+        text_box = draw.textbbox((0, 0), label, font=small)
+        width = text_box[2] - text_box[0]
+        height = text_box[3] - text_box[1]
+        draw.text(
+            ((x1 + x2 - width) / 2, (y1 + y2 - height) / 2 - 2),
+            label,
+            fill="#222222",
+            font=small,
+        )
+
+    draw.line((202, 136, 238, 136), fill="#555f6a", width=2)
+    draw.line((368, 136, 504, 124), fill="#555f6a", width=2)
+    draw.line((368, 150, 504, 234), fill="#555f6a", width=2)
+    draw.text((52, 318), "图 1  设备布置示意", fill="#444444", font=small)
     image.save(path)
     return path
 
 
 def configure_document(document: Document) -> None:
-    style = document.styles["Normal"]
-    style.font.name = "微软雅黑"
-    style.font.size = Pt(10.5)
-    style.element.rPr.rFonts.set(qn("w:eastAsia"), "微软雅黑")
+    normal = document.styles["Normal"]
+    normal.font.name = "宋体"
+    normal.font.size = Pt(10.5)
+    normal.element.rPr.rFonts.set(qn("w:eastAsia"), "宋体")
+
     for name in ("Title", "Heading 1", "Heading 2", "Heading 3"):
         heading = document.styles[name]
-        heading.font.name = "微软雅黑"
-        heading.element.rPr.rFonts.set(qn("w:eastAsia"), "微软雅黑")
-        heading.font.color.rgb = DEEP
-    document.styles["Title"].font.color.rgb = BRAND
+        heading.font.name = "黑体"
+        heading.font.size = Pt(14 if name != "Title" else 18)
+        heading.element.rPr.rFonts.set(qn("w:eastAsia"), "黑体")
+        heading.font.color.rgb = None
+
+    document.styles["Normal"].paragraph_format.space_after = Pt(6)
+    document.styles["Normal"].paragraph_format.line_spacing = 1.35
 
 
 def build_main() -> Path:
     document = Document()
     configure_document(document)
 
-    title = document.add_paragraph("设备检测项目交付文档", style="Title")
+    title = document.add_paragraph("一号车间设备检测报告", style="Title")
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    subtitle = document.add_paragraph("主文档与副文档合并示例")
-    subtitle.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    subtitle.runs[0].font.color.rgb = GREY
-    subtitle.runs[0].font.size = Pt(10)
-
-    document.add_paragraph("本文档汇总设备检测项目的检测范围、实施安排和结果说明。目录与页码可在 Word 中更新。")
-    document.add_paragraph("${toc}")
-
-    document.add_heading("项目概述", level=1)
-    document.add_paragraph(
-        "本项目对生产车间内的电气与暖通设备开展例行检测，重点记录运行参数、异常情况"
-        "和处理建议。项目交付内容包括检测范围、现场计划、原始记录和最终报告。"
+    add_table(
+        document,
+        ["受检单位", "生产保障部", "检测日期", "2026-10-19 至 2026-10-21"],
+        [
+            ["编制", "张明", "审核", "李工"],
+            ["检测地点", "一号车间", "记录人", "王磊"],
+        ],
     )
+
+    document.add_paragraph("${toc}")
+    document.add_heading("检测概况", level=1)
+    document.add_paragraph(
+        "本次检测对象为一号车间东侧的配电柜、控制柜、循环风机和空调机组。"
+        "检测安排在交接班期间进行，现场设备按作业票要求停电或切换至安全状态。"
+    )
+    document.add_paragraph(
+        "报告中的运行参数来自现场仪表读数和设备自带显示值。原始记录由检测人和复核人签字，"
+        "报告结论仅对本次受检设备有效。"
+    )
+
     add_bullets(
         document,
         [
-            "主文档包含项目概述、目录和附录。",
-            "副文档提供检测范围与实施安排。",
-            "合并结果保留原文档中的段落、表格、图片和样式。",
+            "检测依据：设备说明书、作业许可单和公司例行巡检规定。",
+            "检测内容：外观、运行参数、保护功能及异常项复核。",
+            "记录方式：现场填写原始记录表，异常位置补充照片。",
         ],
     )
 
     document.add_paragraph("${merge-point}")
-
-    document.add_heading("附录：使用说明", level=1)
+    document.add_heading("附录：记录说明", level=1)
     document.add_paragraph(
-        "在 Word 中打开合并结果后，按 Ctrl+A 再按 F9 即可刷新目录页码。"
-        "如需重新生成，请返回上传页面替换文件后再次合并。"
+        "原始记录和现场照片存放在一号车间资料柜，复核时按设备名称查找。"
+        "报告内容需要调整时，替换副文档后重新合并即可。"
     )
+    document.add_paragraph("合并完成后，目录页码需要在 Word 中按 Ctrl+A、F9 更新。")
 
     target = ROOT / "主文档.docx"
     document.save(target)
     return target
 
 
-def build_product(logo: Path) -> Path:
+def build_scope(diagram: Path) -> Path:
     document = Document()
     configure_document(document)
 
     document.add_heading("检测范围", level=1)
-    document.add_paragraph("${product-start}")
+    document.add_paragraph("${scope-start}")
 
     document.add_heading("检测对象", level=2)
     document.add_paragraph(
-        "检测范围包括配电柜、控制柜、循环风机和空调机组。现场检测以运行状态下的"
-        "参数记录为主，必要时补充停机检查。"
+        "受检设备位于一号车间东侧，包括 3 面配电柜、2 面控制柜、4 台循环风机和 2 台空调机组。"
+        "设备编号以现场铭牌为准，检测前与设备清单逐台核对。"
     )
-    document.add_paragraph("下图为本项目标识：")
-    document.add_picture(str(logo), width=Inches(2.6))
+    document.add_picture(str(diagram), width=Inches(5.6))
+    caption = document.add_paragraph("图 1  设备布置示意")
+    caption.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    caption.runs[0].font.size = Pt(9)
 
     add_table(
         document,
-        ["检测对象", "检测内容", "状态"],
+        ["设备", "主要检测项目", "记录要求"],
         [
-            ["配电柜", "电压、电流、温升与绝缘状态", "待检测"],
-            ["控制柜", "控制回路、指示和保护功能", "待检测"],
-            ["空调机组", "送风量、回风温度和运行噪声", "待检测"],
+            ["配电柜", "电压、电流、温升和绝缘状态", "记录各回路运行值"],
+            ["控制柜", "控制回路、指示和保护功能", "逐项操作确认"],
+            ["空调机组", "送风量、回风温度和运行噪声", "连续运行 30 分钟后记录"],
+            ["循环风机", "电流、振动和轴承温度", "异常时补充停机检查"],
         ],
     )
 
-    document.add_heading("检测要求", level=2)
+    document.add_heading("检测项目与记录要求", level=2)
     add_bullets(
         document,
         [
-            "记录设备铭牌、额定参数和现场编号。",
-            "测量电压、电流、温度、风量等运行参数。",
-            "异常项需附照片、处理建议和复测结果。",
+            "检测前核对设备编号、额定参数和现场状态。",
+            "运行状态下记录电压、电流、温升、风量等参数。",
+            "发现异常时先停机确认，再补充照片和处理建议。",
         ],
     )
-    document.add_paragraph("${product-end}")
-    document.add_paragraph("这段位于标记之外，不应出现在合并结果中。")
+    document.add_paragraph("${scope-end}")
+    document.add_paragraph("这段说明在标记之外，合并时不应写入报告。")
 
-    target = ROOT / "副文档-产品介绍.docx"
+    target = ROOT / "检测范围.docx"
     document.save(target)
     return target
 
@@ -184,41 +206,31 @@ def build_plan() -> Path:
     document.add_heading("现场实施计划", level=1)
     document.add_paragraph("${plan-start}")
 
-    document.add_heading("进度安排", level=2)
-    add_numbers(
-        document,
-        [
-            "第 1 周：收集设备清单、图纸和运行记录。",
-            "第 2 周：确认停电窗口、检测人员和仪器。",
-            "第 3 周：完成现场检测与原始数据记录。",
-            "第 4 周：复核异常项并提交正式报告。",
-        ],
-    )
-
+    document.add_heading("时间安排", level=2)
     add_table(
         document,
-        ["阶段", "主要工作", "负责人"],
+        ["日期", "工作内容", "参与人员"],
         [
-            ["准备", "设备清单、检测方案、仪器校准", "项目组"],
-            ["现场", "参数测量、状态记录、异常拍照", "检测组"],
-            ["复核", "数据校核、异常项确认", "技术组"],
-            ["交付", "检测报告、原始记录归档", "项目组"],
+            ["10 月 19 日", "核对设备清单，办理作业许可", "张明、王磊"],
+            ["10 月 20 日", "停电检查配电柜和控制柜", "王磊、电气班"],
+            ["10 月 21 日", "记录空调机组和循环风机运行参数", "张明、王磊"],
+            ["10 月 22 日", "复核异常项，整理原始记录", "李工、张明"],
         ],
     )
 
-    document.add_heading("现场注意事项", level=2)
+    document.add_heading("现场要求", level=2)
     add_bullets(
         document,
         [
-            "检测前确认设备停运或切换至安全状态。",
-            "进入现场须佩戴防护用品并遵守作业许可。",
-            "原始记录不得涂改，异常数据需双人确认。",
+            "配电柜检查前由电气班确认断电并挂牌。",
+            "屋面作业系安全带，工具放入工具袋。",
+            "原始记录当天录入，修改处由记录人签字确认。",
         ],
     )
     document.add_paragraph("${plan-end}")
-    document.add_paragraph("这段位于标记之外，不应出现在合并结果中。")
+    document.add_paragraph("这段说明在标记之外，合并时不应写入报告。")
 
-    target = ROOT / "副文档-实施计划.docx"
+    target = ROOT / "实施计划.docx"
     document.save(target)
     return target
 
@@ -226,23 +238,18 @@ def build_plan() -> Path:
 def build_invalid() -> Path:
     document = Document()
     configure_document(document)
-    document.add_heading("异常标记示例", level=1)
+    document.add_heading("标记错误说明", level=1)
     document.add_paragraph("${broken-start}")
-    document.add_paragraph("这个文档只有开始标记，没有结束标记，用于演示警告提示。")
+    document.add_paragraph("该文档只写了开始标记，没有结束标记。合并时应跳过并给出警告。")
     document.add_paragraph("${orphan-end}")
-    target = ROOT / "副文档-异常标记.docx"
+    target = ROOT / "异常标记.docx"
     document.save(target)
     return target
 
 
 def main() -> None:
-    logo = build_logo()
-    created = [
-        build_main(),
-        build_product(logo),
-        build_plan(),
-        build_invalid(),
-    ]
+    diagram = build_diagram()
+    created = [build_main(), build_scope(diagram), build_plan(), build_invalid()]
     for path in created:
         print(f"created: {path.relative_to(ROOT.parent)}")
 

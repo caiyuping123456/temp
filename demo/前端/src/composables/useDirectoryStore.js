@@ -94,7 +94,6 @@ export function useDirectoryStore() {
     if (index >= 0) page.value = Math.floor(index / pageSize.value) + 1
   }
 
-  /* --------------------------- 结构操作 --------------------------- */
 
   const handleAddRoot = () => {
     const result = addRoot(rows.value)

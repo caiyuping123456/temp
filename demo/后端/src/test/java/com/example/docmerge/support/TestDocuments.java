@@ -57,23 +57,19 @@ public final class TestDocuments {
     private TestDocuments() {
     }
 
-    // ---------------------------------------------------------------------
-    // 示例文档
-    // ---------------------------------------------------------------------
 
     public static byte[] mainDocument() throws Exception {
         WordprocessingMLPackage pkg = WordprocessingMLPackage.createPackage();
         ensureDefaultStyles(pkg);
         MainDocumentPart part = pkg.getMainDocumentPart();
 
-        part.getContent().add(styledParagraph("Heading1", "DOCX 文档合并演示"));
+        part.getContent().add(styledParagraph("Heading1", "设备检测报告"));
         part.getContent().add(paragraph(
-                "本示例演示按 name-start/name-end 标记提取副文档内容，并自动生成目录。"));
+                "本次对一号车间配电和暖通设备进行运行状态检测。"));
         part.getContent().add(paragraph("${toc}"));
-        part.getContent().add(paragraph(
-                "副文档内容会插入到下方标记所在位置。"));
+        part.getContent().add(paragraph("检测结果附在下方。"));
         part.getContent().add(paragraph("${merge-point}"));
-        part.getContent().add(paragraph("—— 主文档结束 ——"));
+        part.getContent().add(paragraph("—— 报告结束 ——"));
 
         return save(pkg);
     }
@@ -86,32 +82,32 @@ public final class TestDocuments {
 
         part.getContent().add(paragraph("这段在标记之外，不应出现在合并结果中。"));
         part.getContent().add(paragraph(
-                run("${design-"), run("start}"), run("本节从标记之后开始：")));
-        part.getContent().add(styledParagraph("Heading1", "总体设计"));
+                run("${scope-"), run("start}"), run("检测范围如下：")));
+        part.getContent().add(styledParagraph("Heading1", "检测范围"));
         part.getContent().add(paragraph(
-                run("系统由 "), bold("前端"), run("、"), italic("后端"),
-                run(" 和存储层组成，支持按标识区域精确合并。")));
-        part.getContent().add(styledParagraph("Heading2", "关键指标"));
-        part.getContent().add(listItem(ids.decimal(), 0, "合并成功率不低于 99.9%"));
-        part.getContent().add(listItem(ids.decimal(), 0, "单次合并耗时小于 2 秒"));
+                run("检查 "), bold("配电柜"), run("、"), italic("空调机组"),
+                run(" 和循环风机的运行参数与保护功能。")));
+        part.getContent().add(styledParagraph("Heading2", "主要检测项目"));
+        part.getContent().add(listItem(ids.decimal(), 0, "记录输入电压和回路电流"));
+        part.getContent().add(listItem(ids.decimal(), 0, "检查控制柜指示灯和保护动作"));
         part.getContent().add(table(new String[][]{
-                {"指标", "目标值"},
-                {"吞吐量", "1000 次/天"},
-                {"可用性", "99.9%"}
+                {"检测项目", "记录要求"},
+                {"输入电压", "三相 380 V"},
+                {"环境温度", "26 ℃"}
         }));
         part.getContent().add(imageParagraph(pkg, 101));
         part.getContent().add(hyperlinkParagraph(pkg,
-                "访问示例网站", "https://example.com/docx-merge"));
-        part.getContent().add(paragraph(run("本节结束。"), run("${design-end}")));
+                "查看设备台账", "https://example.com/equipment"));
+        part.getContent().add(paragraph(run("本节结束。"), run("${scope-end}")));
         part.getContent().add(paragraph("这段也不应出现。"));
 
         // 同一段落内的区域
         part.getContent().add(paragraph(
-                run("${inline-start}"), bold("同一段落内的内容"), run("${inline-end}")));
+                run("${inline-start}"), bold("同一段落中的内容"), run("${inline-end}")));
 
         // 标记被拆分到多个 run 的区域
         part.getContent().add(paragraph(
-                run("${split-"), run("start}"), run("拆分 run 的标记也能识别"),
+                run("${split-"), run("start}"), run("跨 run 的标记也能识别"),
                 run("${split-"), run("end}")));
 
         return save(pkg);
@@ -123,25 +119,24 @@ public final class TestDocuments {
         MainDocumentPart part = pkg.getMainDocumentPart();
         ListIds ids = addNumbering(pkg);
 
-        part.getContent().add(paragraph("sub2 的标记之外内容。"));
-        part.getContent().add(paragraph(run("${api-start}"), run("接口说明如下：")));
-        part.getContent().add(styledParagraph("Heading1", "接口说明"));
-        part.getContent().add(listItem(ids.bullet(), 0, "POST /api/documents/merge 上传主文档与副文档"));
-        part.getContent().add(listItem(ids.bullet(), 0, "GET /api/documents/download/{fileId} 下载结果"));
-        part.getContent().add(listItem(ids.bullet(), 0, "DELETE /api/documents/files/{fileId} 删除临时文件"));
-        part.getContent().add(styledParagraph("Heading2", "请求示例"));
+        part.getContent().add(paragraph("以下内容不参与合并。"));
+        part.getContent().add(paragraph(run("${issue-start}"), run("异常项如下：")));
+        part.getContent().add(styledParagraph("Heading1", "异常项与建议"));
+        part.getContent().add(listItem(ids.bullet(), 0, "控制柜端子排有少量积尘"));
+        part.getContent().add(listItem(ids.bullet(), 0, "循环风机轴承温度偏高"));
+        part.getContent().add(styledParagraph("Heading2", "处理建议"));
         part.getContent().add(paragraph(
-                run("使用 "), bold("multipart/form-data"), run(" 上传，字段名为 "),
-                code("mainFile"), run(" 与 "), code("subFiles"), run("。")));
+                run("停电后清理端子排，并对 "), bold("循环风机"), run(" 补加润滑脂，"),
+                italic("复测正常后恢复运行"), run("。")));
         part.getContent().add(table(new String[][]{
-                {"参数", "说明"},
-                {"mainFile", "主文档，必须包含 ${merge-point} 或直接追加"},
-                {"subFiles", "副文档列表，至少一个"}
+                {"设备", "建议"},
+                {"控制柜", "清理端子排后复测"},
+                {"循环风机", "补加润滑脂并记录温度"}
         }));
         part.getContent().add(hyperlinkParagraph(pkg,
-                "查看完整 README", "https://example.com/docx-merge/readme"));
-        part.getContent().add(paragraph("${api-end}"));
-        part.getContent().add(paragraph("sub2 的标记之外内容也不应出现。"));
+                "查看现场记录", "https://example.com/site-record"));
+        part.getContent().add(paragraph("${issue-end}"));
+        part.getContent().add(paragraph("以下内容也不参与合并。"));
 
         return save(pkg);
     }
@@ -156,9 +151,6 @@ public final class TestDocuments {
         return save(pkg);
     }
 
-    // ---------------------------------------------------------------------
-    // 读取与断言辅助
-    // ---------------------------------------------------------------------
 
     public static WordprocessingMLPackage load(byte[] docx) throws Exception {
         return WordprocessingMLPackage.load(new ByteArrayInputStream(docx));
@@ -208,9 +200,6 @@ public final class TestDocuments {
         return stylesPart != null && stylesPart.getStyleById(styleId) != null;
     }
 
-    // ---------------------------------------------------------------------
-    // 段落 / run / 表格 / 图片
-    // ---------------------------------------------------------------------
 
     public static P paragraph(String text) {
         return paragraph(run(text));
@@ -391,9 +380,6 @@ public final class TestDocuments {
         return out.toByteArray();
     }
 
-    // ---------------------------------------------------------------------
-    // 编号定义
-    // ---------------------------------------------------------------------
 
     public record ListIds(int decimal, int bullet) {
     }

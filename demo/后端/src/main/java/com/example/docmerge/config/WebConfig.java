@@ -4,9 +4,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-/**
- * Web 相关配置：演示环境允许跨域，便于 demo/frontend 直接调用。
- */
+/** 前端单独启动时需要跨域访问接口。 */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 

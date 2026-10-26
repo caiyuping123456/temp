@@ -47,36 +47,36 @@ def upload_inspect(path: Path) -> dict:
 
 def main() -> None:
     main_file = ROOT / "主文档.docx"
-    product = ROOT / "副文档-产品介绍.docx"
-    plan = ROOT / "副文档-实施计划.docx"
-    invalid = ROOT / "副文档-异常标记.docx"
-    for path in (main_file, product, plan, invalid):
+    scope = ROOT / "检测范围.docx"
+    plan = ROOT / "实施计划.docx"
+    invalid = ROOT / "异常标记.docx"
+    for path in (main_file, scope, plan, invalid):
         if not path.exists():
             fail(f"missing sample: {path} (run samples/generate_samples.py)")
 
     print("[1] inspect samples")
     main_info = upload_inspect(main_file)
     check(main_info["tagCount"] == 0, "main document has no name-start/name-end tags")
-    product_info = upload_inspect(product)
-    check(product_info["tagCount"] == 2, "product document has 2 tag occurrences")
-    check(any(tag["status"] == "PAIRED" for tag in product_info["tags"]), "product tag is paired")
+    scope_info = upload_inspect(scope)
+    check(scope_info["tagCount"] == 2, "scope document has 2 tag occurrences")
+    check(any(tag["status"] == "PAIRED" for tag in scope_info["tags"]), "scope tag is paired")
     invalid_info = upload_inspect(invalid)
     check(len(invalid_info.get("warnings") or []) > 0, "invalid document reports warnings")
 
     print("[2] merge two sub documents")
     files = [("mainFile", (main_file.name, main_file.open("rb"), "application/octet-stream"))]
-    files.append(("subFiles", (product.name, product.open("rb"), "application/octet-stream")))
+    files.append(("subFiles", (scope.name, scope.open("rb"), "application/octet-stream")))
     files.append(("subFiles", (plan.name, plan.open("rb"), "application/octet-stream")))
     response = requests.post(
         f"{BASE_URL}/api/documents/merge",
         files=files,
-        data={"outputName": "合并结果示例"},
+        data={"outputName": "合并结果"},
         timeout=120,
     )
     payload = response.json()
     check(response.ok and payload.get("code") == 0, "merge returns code 0")
     result = payload["data"]
-    check(result["fileName"] == "合并结果示例.docx", "output name is normalized")
+    check(result["fileName"] == "合并结果.docx", "output name is normalized")
     check(result["size"] > 0, "output size is positive")
     check(any(tag["status"] == "PAIRED" for tag in result.get("tags") or []), "merged tags are paired")
     check(not (result.get("warnings") or []), "valid merge has no warnings")
@@ -89,7 +89,7 @@ def main() -> None:
         "download content type is DOCX",
     )
 
-    target = ROOT / "合并结果示例.docx"
+    target = ROOT / "合并结果.docx"
     target.write_bytes(download.content)
 
     document = Document(io.BytesIO(download.content))
@@ -98,11 +98,11 @@ def main() -> None:
         cell.text for table in document.tables for row in table.rows for cell in row.cells
     )
     combined = text + "\n" + table_text
-    check("检测范围" in combined, "product content is present")
-    check("进度安排" in combined, "plan content is present")
-    check("电压、电流、温升与绝缘状态" in combined, "table content is preserved")
-    check("附录：使用说明" in combined, "main document appendix is preserved")
-    check("这段位于标记之外" not in combined, "content outside markers is excluded")
+    check("检测项目与记录要求" in combined, "scope content is present")
+    check("时间安排" in combined, "plan content is present")
+    check("电压、电流、温升和绝缘状态" in combined, "table content is preserved")
+    check("附录：记录说明" in combined, "main document appendix is preserved")
+    check("这段说明在标记之外" not in combined, "content outside markers is excluded")
     check("${" not in combined, "markers are removed from output")
 
     with zipfile.ZipFile(io.BytesIO(download.content)) as archive:

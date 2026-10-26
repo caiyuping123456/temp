@@ -44,16 +44,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 /**
- * Copies the tagged content of sub documents into the main document while keeping
- * paragraphs, tables, images, styles and numbering intact.
- *
- * <p>Workflow:
- * <ol>
- *     <li>Extract every paired ${name-start}...${name-end} range from the sub document.</li>
- *     <li>Convert each block to DOM, copy referenced relationships / numbering definitions,
- *         then rewrite relationship ids, numIds and drawing ids.</li>
- *     <li>Copy missing styles from the sub document and demote sub headings by one level.</li>
- * </ol>
+ * 把副文档标记范围内的段落、表格、图片、样式和编号复制到主文档。
  */
 @Component
 public class DocxContentCopier {
@@ -158,9 +149,6 @@ public class DocxContentCopier {
         return r;
     }
 
-    // ------------------------------------------------------------------
-    // Tag extraction
-    // ------------------------------------------------------------------
 
     /**
      * Extract content for every tag pair. Supports same-paragraph ranges, ranges
@@ -247,9 +235,6 @@ public class DocxContentCopier {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Reference remapping
-    // ------------------------------------------------------------------
 
     /**
      * Marshal one block to DOM, copy referenced parts, rewrite ids and unmarshal again.
@@ -378,9 +363,6 @@ public class DocxContentCopier {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Relationships
-    // ------------------------------------------------------------------
 
     private String copyRelationship(SubContext ctx, String oldRelId, List<String> warnings) {
         if (oldRelId == null || oldRelId.isBlank()) {
@@ -412,7 +394,7 @@ public class DocxContentCopier {
                     newId = copyBinaryPart(ctx, rel, binaryPart, warnings);
                 } else {
                     // Charts / embedded XML need recursive copying of their own relationships.
-                    // This demo deliberately keeps the original reference and warns instead.
+                    // 暂不复制图表内部关系，保留原引用并给出警告。
                     warnings.add("副文档 [" + ctx.subName + "] 中的复杂对象（图表/嵌入 XML，rId="
                             + oldRelId + "）未复制，已保留原引用，可能导致该对象无法显示");
                     log.warn("Skipped non-binary relationship: sub={}, rId={}, type={}, part={}",
@@ -518,9 +500,6 @@ public class DocxContentCopier {
         return "bin";
     }
 
-    // ------------------------------------------------------------------
-    // Styles
-    // ------------------------------------------------------------------
 
     private StyleDefinitionsPart ensureStylePart(WordprocessingMLPackage main) {
         StyleDefinitionsPart part = main.getMainDocumentPart().getStyleDefinitionsPart(true);
@@ -650,9 +629,6 @@ public class DocxContentCopier {
         }
     }
 
-    // ------------------------------------------------------------------
-    // Numbering
-    // ------------------------------------------------------------------
 
     /**
      * Copy a numbering definition and return the new numId.
@@ -850,9 +826,6 @@ public class DocxContentCopier {
         return lvl;
     }
 
-    // ------------------------------------------------------------------
-    // Heading demotion
-    // ------------------------------------------------------------------
 
     /**
      * Demote sub document headings by one level and create derived styles that keep
@@ -958,9 +931,6 @@ public class DocxContentCopier {
         return derivedId;
     }
 
-    // ------------------------------------------------------------------
-    // Context
-    // ------------------------------------------------------------------
 
     private static final class SubContext {
         private final WordprocessingMLPackage main;

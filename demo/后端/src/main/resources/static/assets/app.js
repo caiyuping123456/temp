@@ -1,11 +1,3 @@
-/**
- * 文档合并页面逻辑。
- *
- * 接口：
- * - POST /api/documents/inspect  单文件，返回识别到的标识符
- * - POST /api/documents/merge    主文档 + 多个副文档 + 输出名
- * - GET  /api/documents/download/{fileId}
- */
 ;(() => {
   'use strict'
 
@@ -45,9 +37,6 @@
     OVERLAP: '标记嵌套冲突',
   }
 
-  /* ------------------------------------------------------------------ */
-  /* 工具                                                                */
-  /* ------------------------------------------------------------------ */
 
   const formatSize = (bytes) => {
     if (!Number.isFinite(bytes) || bytes <= 0) return '0 B'
@@ -70,12 +59,9 @@
   const setLoading = (value) => {
     state.loading = value
     dom.mergeBtn.disabled = value || !state.main || state.subs.length === 0
-    dom.mergeBtn.textContent = value ? '合并中…' : '开始合并'
+    dom.mergeBtn.textContent = value ? '合并中…' : '合并文档'
   }
 
-  /* ------------------------------------------------------------------ */
-  /* 标签页                                                              */
-  /* ------------------------------------------------------------------ */
 
   const activateTab = (name) => {
     dom.tabs.forEach((tab) => {
@@ -92,9 +78,6 @@
     tab.addEventListener('click', () => activateTab(tab.dataset.tab))
   })
 
-  /* ------------------------------------------------------------------ */
-  /* 标识解析                                                            */
-  /* ------------------------------------------------------------------ */
 
   const inspectFile = async (file) => {
     const form = new FormData()
@@ -142,9 +125,6 @@
     }
   }
 
-  /* ------------------------------------------------------------------ */
-  /* 文件列表渲染                                                        */
-  /* ------------------------------------------------------------------ */
 
   const renderMain = () => {
     dom.mainList.replaceChildren()
@@ -227,9 +207,6 @@
     setLoading(state.loading)
   }
 
-  /* ------------------------------------------------------------------ */
-  /* 添加文件                                                            */
-  /* ------------------------------------------------------------------ */
 
   const addMainFile = (file) => {
     if (!isDocx(file)) {
@@ -287,9 +264,6 @@
     })
   }
 
-  /* ------------------------------------------------------------------ */
-  /* 拖拽上传                                                            */
-  /* ------------------------------------------------------------------ */
 
   const bindDropzone = (zone, input, handler) => {
     zone.addEventListener('dragover', (event) => {
@@ -319,9 +293,6 @@
 
   bindDropzone(dom.subDrop, dom.subInput, addSubFiles)
 
-  /* ------------------------------------------------------------------ */
-  /* 状态区                                                              */
-  /* ------------------------------------------------------------------ */
 
   const clearStatus = () => {
     dom.status.replaceChildren()
@@ -338,7 +309,7 @@
   const renderError = (message) => {
     dom.status.replaceChildren()
     const box = create('div', 'status-box error')
-    box.append(create('span', 'status-title', '操作失败'))
+    box.append(create('span', 'status-title', '合并失败'))
     box.append(create('span', '', message))
     dom.status.append(box)
   }
@@ -374,9 +345,6 @@
     dom.status.append(box)
   }
 
-  /* ------------------------------------------------------------------ */
-  /* 合并 / 重置                                                         */
-  /* ------------------------------------------------------------------ */
 
   const merge = async () => {
     if (state.loading || !state.main || !state.subs.length) return
@@ -423,9 +391,6 @@
     if (event.key === 'Enter') merge()
   })
 
-  /* ------------------------------------------------------------------ */
-  /* 初始化                                                              */
-  /* ------------------------------------------------------------------ */
 
   renderMain()
   renderSubs()

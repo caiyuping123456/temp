@@ -164,9 +164,7 @@ function breakCycles(rows, byId) {
 
 const commit = (roots) => renumber(flattenTree(roots))
 
-/* ------------------------------------------------------------------ */
 /* 结构操作                                                             */
-/* ------------------------------------------------------------------ */
 
 /** 新增一级目录（追加到末尾）。 */
 export function addRoot(rows) {
@@ -359,9 +357,7 @@ export function moveByDrag(rows, { sourceId, targetId, position = 'after', depth
   return { ok: true, rows: commit(roots) }
 }
 
-/* ------------------------------------------------------------------ */
 /* 查询                                                                */
-/* ------------------------------------------------------------------ */
 
 export function isDescendant(ancestor, node) {
   let cursor = node?.parent || null

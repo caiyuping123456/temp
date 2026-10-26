@@ -100,17 +100,17 @@ class DocumentMergeIntegrationTest {
         String xml = TestDocuments.documentXml(merged);
 
         assertThat(text)
-                .contains("DOCX 文档合并演示")
-                .contains("本节从标记之后开始：")
-                .contains("系统由")
-                .contains("同一段落内的内容")
-                .contains("拆分 run 的标记也能识别")
-                .contains("接口说明如下：")
-                .contains("吞吐量")
+                .contains("设备检测报告")
+                .contains("检测范围如下：")
+                .contains("配电柜")
+                .contains("同一段落中的内容")
+                .contains("跨 run 的标记也能识别")
+                .contains("异常项如下：")
+                .contains("输入电压")
                 .contains("目录")
                 .doesNotContain("这段在标记之外")
                 .doesNotContain("这段也不应出现")
-                .doesNotContain("sub2 的标记之外内容也不应出现")
+                .doesNotContain("以下内容也不参与合并")
                 .doesNotContain("${");
 
         assertThat(xml)

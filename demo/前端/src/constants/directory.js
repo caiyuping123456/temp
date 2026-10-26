@@ -1,7 +1,7 @@
 import { createNode, renumber } from '../utils/tree'
 
-export const STORAGE_KEY = 'directory-demo:v1'
-export const LEGACY_STORAGE_KEY = 'openharness-directory-demo:v1'
+export const STORAGE_KEY = 'inspection-directory:v1'
+export const LEGACY_STORAGE_KEY = 'directory-demo:v1'
 
 export const DEFAULT_PAGE_SIZE = 10
 export const PAGE_SIZES = [10, 20, 50]

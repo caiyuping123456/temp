@@ -127,7 +127,7 @@ const handleQuickSetConfirm = (value) => {
 }
 
 const handleReset = () => {
-  ElMessageBox.confirm('将清除当前浏览器中的修改，并恢复示例目录。', '恢复示例数据', {
+  ElMessageBox.confirm('当前浏览器里的修改会被清除。', '恢复初始目录', {
     type: 'warning',
     confirmButtonText: '恢复',
     cancelButtonText: '取消',
@@ -135,7 +135,7 @@ const handleReset = () => {
     .then(() => {
       resetDemo()
       clearSelection()
-      ElMessage.success('已恢复示例数据')
+      ElMessage.success('已恢复初始数据')
     })
     .catch(() => {})
 }
@@ -168,10 +168,10 @@ const handleReset = () => {
         {{ field.label }}
       </el-button>
       <span class="toolbar-spacer"></span>
-      <el-button size="small" text :icon="RefreshLeft" @click="handleReset">恢复示例数据</el-button>
+      <el-button size="small" text :icon="RefreshLeft" @click="handleReset">恢复初始数据</el-button>
     </div>
 
-    <p class="table-tip">拖拽行首调整顺序；勾选行后可新增下级、删除或批量设置字段。</p>
+    <p class="table-tip">拖动行首可调整顺序；新增下级、删除和批量设置需要先勾选目录。</p>
 
     <DirectoryTable
       ref="tableRef"
