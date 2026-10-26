@@ -10,7 +10,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['update:modelValue', 'confirm'])
-
 const value = ref('')
 
 watch(
@@ -32,19 +31,14 @@ const submit = () => {
   <el-dialog
     :model-value="modelValue"
     :title="`设置${fieldLabel}`"
-    width="460px"
+    width="440px"
     align-center
     :close-on-click-modal="false"
     @update:model-value="emit('update:modelValue', $event)"
   >
-    <p class="quick-tip">
-      将写入已选中的
-      <strong>{{ count }}</strong>
-      行目录，原内容会被覆盖。
-    </p>
+    <p class="quick-tip">将覆盖选中 {{ count }} 行的原内容。</p>
     <el-input
       v-model="value"
-      size="large"
       :placeholder="placeholder"
       :maxlength="maxlength"
       :aria-label="`设置${fieldLabel}`"
@@ -62,12 +56,12 @@ const submit = () => {
 <style scoped>
 .quick-tip {
   margin: 0 0 12px;
-  color: #64708a;
-  font-size: 13px;
-  line-height: 21px;
+  color: #68788d;
+  font-size: 12px;
+  line-height: 20px;
 }
 
 .quick-tip strong {
-  color: var(--brand);
+  color: var(--primary);
 }
 </style>

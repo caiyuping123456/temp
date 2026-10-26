@@ -14,8 +14,7 @@ export default defineConfig({
     open: false,
   },
   build: {
-    // Element Plus 全量引入后体积较大，demo 场景放宽告警阈值
-    chunkSizeWarningLimit: 1200,
+    chunkSizeWarningLimit: 1600,
   },
   test: {
     environment: 'node',

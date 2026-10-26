@@ -1,5 +1,5 @@
 /**
- * Word 文档合并 Demo 的前端逻辑（无框架，直接调用后端 REST 接口）。
+ * 文档合并页面逻辑。
  *
  * 接口：
  * - POST /api/documents/inspect  单文件，返回识别到的标识符

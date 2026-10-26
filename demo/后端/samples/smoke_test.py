@@ -1,4 +1,4 @@
-"""End-to-end smoke test for the DOCX merge demo.
+"""End-to-end smoke test for the DOCX merge service.
 
 Start the backend first:
     java -jar target/doc-merge-demo-1.0.0.jar
@@ -10,6 +10,7 @@ Then run:
 from __future__ import annotations
 
 import io
+import os
 import sys
 import zipfile
 from pathlib import Path
@@ -17,7 +18,7 @@ from pathlib import Path
 import requests
 from docx import Document
 
-BASE_URL = "http://localhost:8080"
+BASE_URL = os.environ.get("BASE_URL", "http://localhost:8080")
 ROOT = Path(__file__).resolve().parent
 
 
@@ -97,9 +98,9 @@ def main() -> None:
         cell.text for table in document.tables for row in table.rows for cell in row.cells
     )
     combined = text + "\n" + table_text
-    check("产品介绍" in combined, "product content is present")
-    check("实施计划" in combined, "plan content is present")
-    check("任务编排" in combined, "table content is preserved")
+    check("检测范围" in combined, "product content is present")
+    check("进度安排" in combined, "plan content is present")
+    check("电压、电流、温升与绝缘状态" in combined, "table content is preserved")
     check("附录：使用说明" in combined, "main document appendix is preserved")
     check("这段位于标记之外" not in combined, "content outside markers is excluded")
     check("${" not in combined, "markers are removed from output")

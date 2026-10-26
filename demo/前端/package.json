@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Vue3 + Element Plus 树形目录表格 Demo",
+  "description": "检测目录树形表格示例",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -12,8 +12,11 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
+    "@vxe-ui/core": "^4.5.0",
     "element-plus": "^2.14.7",
-    "vue": "^3.5.44"
+    "vue": "^3.5.44",
+    "vxe-table": "^4.23.11",
+    "xe-utils": "^4.1.3"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.10",

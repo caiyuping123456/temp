@@ -1,16 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import {
-  Bottom,
-  Calendar,
-  Collection,
-  Delete,
-  InfoFilled,
-  Plus,
-  RefreshLeft,
-  User,
-} from '@element-plus/icons-vue'
+import { Calendar, Collection, Delete, Plus, RefreshLeft, User } from '@element-plus/icons-vue'
 import DirectoryTable from '@/components/DirectoryTable.vue'
 import DeleteConfirmDialog from '@/components/DeleteConfirmDialog.vue'
 import QuickSetDialog from '@/components/QuickSetDialog.vue'
@@ -36,18 +27,12 @@ const {
 
 const tableRef = ref(null)
 const selection = ref([])
-
 const deleteDialog = reactive({ visible: false, ids: [], count: 0 })
 const quickSet = reactive({ visible: false, field: null, ids: [] })
 
-const selectedCount = computed(() => selection.value.length)
 const selectedIds = computed(() => selection.value.map((row) => row.id))
-
-const quickSetIcons = {
-  owner: User,
-  dueDate: Calendar,
-  standard: Collection,
-}
+const selectedCount = computed(() => selectedIds.value.length)
+const quickSetIcons = { owner: User, dueDate: Calendar, standard: Collection }
 
 const clearSelection = () => {
   tableRef.value?.clearSelection()
@@ -56,7 +41,7 @@ const clearSelection = () => {
 
 const ensureSelection = () => {
   if (!selectedIds.value.length) {
-    ElMessage.warning('请先勾选需要操作的目录行')
+    ElMessage.warning('请先勾选目录')
     return null
   }
   return [...selectedIds.value]
@@ -69,7 +54,7 @@ const handleSelectionChange = (rows) => {
 const handleAddRoot = () => {
   addRoot()
   clearSelection()
-  ElMessage.success('已新增一级目录，序号已重新生成')
+  ElMessage.success('已新增一级目录')
 }
 
 const handleAddChild = () => {
@@ -77,7 +62,7 @@ const handleAddChild = () => {
   if (!ids) return
   const created = addChildren(ids)
   clearSelection()
-  ElMessage.success(`已在 ${ids.length} 行下新增子级，共新增 ${created.length} 条`)
+  ElMessage.success(`已新增 ${created.length} 条子级目录`)
 }
 
 const handleDelete = () => {
@@ -91,7 +76,7 @@ const handleDelete = () => {
 
   removeRows(ids, 'subtree')
   clearSelection()
-  ElMessage.success(`已删除 ${ids.length} 条目录`)
+  ElMessage.success('已删除所选目录')
 }
 
 const handleDeleteConfirm = (mode) => {
@@ -99,11 +84,7 @@ const handleDeleteConfirm = (mode) => {
   const removed = removeRows(ids, mode)
   deleteDialog.visible = false
   clearSelection()
-  ElMessage.success(
-    mode === 'promote'
-      ? `已删除 ${ids.length} 条目录，其子级已提升一级`
-      : `已删除 ${removed} 条目录（含全部子级）`,
-  )
+  ElMessage.success(mode === 'promote' ? '已删除目录并提升子级' : `已删除 ${removed} 条目录`)
 }
 
 const handleMove = ({ id, offset }) => {
@@ -112,7 +93,7 @@ const handleMove = ({ id, offset }) => {
     ElMessage.warning(result.message)
     return
   }
-  selection.value = []
+  clearSelection()
 }
 
 const handleLevel = ({ id, delta }) => {
@@ -121,13 +102,13 @@ const handleLevel = ({ id, delta }) => {
     ElMessage.warning(result.message)
     return
   }
-  selection.value = []
+  clearSelection()
 }
 
 const handleDragDrop = (payload) => {
   const result = moveByDrag(payload)
-  selection.value = []
   if (!result.ok) ElMessage.warning(result.message)
+  clearSelection()
 }
 
 const openQuickSet = (field) => {
@@ -141,20 +122,16 @@ const openQuickSet = (field) => {
 const handleQuickSetConfirm = (value) => {
   if (!quickSet.field) return
   setField(quickSet.ids, quickSet.field.key, value)
-  ElMessage.success(`已将 ${quickSet.ids.length} 行的${quickSet.field.label}设为「${value}」`)
+  ElMessage.success('批量设置已保存')
   clearSelection()
 }
 
 const handleReset = () => {
-  ElMessageBox.confirm(
-    '将清除浏览器中保存的数据，并恢复为示例目录。是否继续？',
-    '恢复示例数据',
-    {
-      type: 'warning',
-      confirmButtonText: '恢复',
-      cancelButtonText: '取消',
-    },
-  )
+  ElMessageBox.confirm('将清除当前浏览器中的修改，并恢复示例目录。', '恢复示例数据', {
+    type: 'warning',
+    confirmButtonText: '恢复',
+    cancelButtonText: '取消',
+  })
     .then(() => {
       resetDemo()
       clearSelection()
@@ -168,39 +145,33 @@ const handleReset = () => {
   <section class="panel">
     <div class="panel-head">
       <div class="panel-title">
-        <span class="bar"></span>
-        <h2>目录信息</h2>
-        <span class="panel-sub">支持多选、层级调整、拖拽排序，序号自动生成</span>
+        <h2>目录清单</h2>
+        <span>共 {{ total }} 条</span>
+        <span v-if="selectedCount" class="selection-count">已选 {{ selectedCount }} 条</span>
       </div>
-      <div class="panel-meta">
-        <el-tag effect="plain" round type="info">共 {{ total }} 条</el-tag>
-        <span class="selection-chip" :class="{ 'is-active': selectedCount > 0 }">
-          已选 {{ selectedCount }} 条
-        </span>
+      <div class="panel-actions">
+        <el-button size="small" :icon="Plus" type="primary" @click="handleAddRoot">新增第一级</el-button>
+        <el-button size="small" :icon="Plus" @click="handleAddChild">新增下级</el-button>
+        <el-button size="small" :icon="Delete" @click="handleDelete">删除</el-button>
       </div>
     </div>
 
     <div class="toolbar">
-      <el-button type="primary" :icon="Plus" @click="handleAddRoot">新增第一级</el-button>
-      <el-button type="primary" plain :icon="Bottom" @click="handleAddChild">新增下级</el-button>
-      <el-button plain :icon="Delete" @click="handleDelete">删除行</el-button>
-      <el-divider direction="vertical" />
+      <span class="toolbar-label">批量设置</span>
       <el-button
         v-for="field in QUICK_SET_FIELDS"
         :key="field.key"
+        size="small"
         :icon="quickSetIcons[field.key]"
         @click="openQuickSet(field)"
       >
-        {{ field.button }}
+        {{ field.label }}
       </el-button>
       <span class="toolbar-spacer"></span>
-      <el-button text type="info" :icon="RefreshLeft" @click="handleReset">恢复示例数据</el-button>
+      <el-button size="small" text :icon="RefreshLeft" @click="handleReset">恢复示例数据</el-button>
     </div>
 
-    <p class="toolbar-hint">
-      <el-icon><InfoFilled /></el-icon>
-      “新增下级 / 删除行 / 批量设置”需先勾选行；删除含子级的目录时会询问「一并删除」或「子级提升一级」。
-    </p>
+    <p class="table-tip">拖拽行首调整顺序；勾选行后可新增下级、删除或批量设置字段。</p>
 
     <DirectoryTable
       ref="tableRef"
@@ -213,7 +184,7 @@ const handleReset = () => {
     />
 
     <div class="pager-row">
-      <span class="pager-tip">拖动左侧手柄可排序，拖拽时左右移动指针可调整层级</span>
+      <span class="pager-note">修改内容会自动保存</span>
       <el-pagination
         v-model:current-page="page"
         v-model:page-size="pageSize"
@@ -221,6 +192,7 @@ const handleReset = () => {
         :total="total"
         layout="total, sizes, prev, pager, next, jumper"
         background
+        small
       />
     </div>
 
