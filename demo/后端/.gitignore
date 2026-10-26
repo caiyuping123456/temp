@@ -1,0 +1,17 @@
+# Maven build output
+target/
+
+# Runtime logs and temporary files
+*.log
+*.pid
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Word 文档合并 · Spring Boot + docx4j</title>
+    <link rel="stylesheet" href="/assets/app.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div class="hero-mark">W</div>
+        <div>
+          <h1>Word 文档合并</h1>
+          <p>按 <code>${tag-start}</code> / <code>${tag-end}</code> 截取副文档内容，合并到主文档并生成目录</p>
+        </div>
+        <span class="hero-tag">Spring Boot + docx4j</span>
+      </header>
+
+      <main class="card">
+        <section class="tabs" role="tablist" aria-label="文档上传">
+          <button class="tab is-active" id="tab-main" role="tab" aria-selected="true" aria-controls="panel-main" data-tab="main">
+            主文档
+            <span class="tab-count" id="main-count">0</span>
+          </button>
+          <button class="tab" id="tab-sub" role="tab" aria-selected="false" aria-controls="panel-sub" data-tab="sub">
+            副文档
+            <span class="tab-count" id="sub-count">0</span>
+          </button>
+        </section>
+
+        <section class="panel" id="panel-main" role="tabpanel" aria-labelledby="tab-main">
+          <label class="dropzone" id="main-drop" for="main-input">
+            <input id="main-input" type="file" accept=".docx" hidden />
+            <span class="dropzone-icon" aria-hidden="true">＋</span>
+            <span class="dropzone-title">点击或拖拽上传主文档</span>
+            <span class="dropzone-hint">仅支持 .docx，单文件；可包含 ${merge-point} 与 ${toc} 标记</span>
+          </label>
+          <ul class="file-list" id="main-list"></ul>
+        </section>
+
+        <section class="panel" id="panel-sub" role="tabpanel" aria-labelledby="tab-sub" hidden>
+          <label class="dropzone" id="sub-drop" for="sub-input">
+            <input id="sub-input" type="file" accept=".docx" multiple hidden />
+            <span class="dropzone-icon" aria-hidden="true">＋</span>
+            <span class="dropzone-title">点击或拖拽上传副文档</span>
+            <span class="dropzone-hint">支持批量选择，合并时按下方列表顺序依次插入</span>
+          </label>
+          <ul class="file-list" id="sub-list"></ul>
+          <p class="empty-tip" id="sub-empty">尚未上传副文档</p>
+        </section>
+
+        <section class="merge-bar">
+          <label class="output-name">
+            <span>输出文件名</span>
+            <input id="output-name" type="text" value="合并结果" maxlength="80" placeholder="合并结果" />
+            <span class="suffix">.docx</span>
+          </label>
+          <div class="actions">
+            <button class="btn ghost" id="reset-btn" type="button">重置</button>
+            <button class="btn primary" id="merge-btn" type="button" disabled>开始合并</button>
+          </div>
+        </section>
+
+        <section class="status" id="status" aria-live="polite"></section>
+      </main>
+
+      <section class="tips">
+        <h2>标记规则</h2>
+        <div class="tips-grid">
+          <div>
+            <h3>截取区域</h3>
+            <p>标识必须成对出现，名称支持字母、数字、下划线，区分大小写：</p>
+            <pre>${chapter1-start}
+这里是需要截取的内容，可包含表格、图片、特殊样式
+${chapter1-end}</pre>
+          </div>
+          <div>
+            <h3>插入位置</h3>
+            <p>主文档中可使用以下特殊标记：</p>
+            <pre>${merge-point}  合并内容插入到该位置
+${toc}          目录插入到该位置
+
+未提供时：内容追加到文末，目录放在开头。</pre>
+          </div>
+          <div>
+            <h3>目录与页码</h3>
+            <p>
+              合并结果会写入 Word 原生 TOC 域。为了兼容纯 Java 环境，页码由 Word 更新域时计算：
+              打开文档后按 <kbd>Ctrl</kbd> + <kbd>A</kbd> 再按 <kbd>F9</kbd>，
+              或允许 Word 提示的“更新域”即可。
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        临时文件保存在服务端 <code>docx-merge</code> 目录，默认 2 小时后自动清理。
+      </footer>
+    </div>
+
+    <script src="/assets/app.js"></script>
+  </body>
+</html>

@@ -1,0 +1,41 @@
+server:
+  port: 8080
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
+
+spring:
+  application:
+    name: doc-merge-demo
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 160MB
+  jackson:
+    default-property-inclusion: non_null
+  mvc:
+    problemdetails:
+      enabled: false
+
+app:
+  storage:
+    # 临时目录，可用环境变量 APP_STORAGE_DIR 覆盖
+    dir: ${java.io.tmpdir}/docx-merge
+    retention-hours: 2
+  merge:
+    page-break-between: true
+    toc-title: 目录
+    toc-depth: 3
+    heading-title-source: filename
+    number-headings: true
+
+logging:
+  level:
+    root: INFO
+    com.example.docmerge: INFO
+    org.docx4j: WARN
+  pattern:
+    console: "%d{HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
