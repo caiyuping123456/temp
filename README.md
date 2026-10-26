@@ -9,4 +9,4 @@
   - 后端：Spring Boot + docx4j，实现 DOCX 文档合并。
 - `myread/`：Python 最小 Agent 实现，对应 Agent 相关面试题。
 
-各题目按目录独立存放，具体运行方式见对应目录下的 README。
+每个题目目录下都有自己的 README，具体运行方式请看对应目录。
